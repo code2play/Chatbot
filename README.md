@@ -1,23 +1,21 @@
-# Seq2Seq Chatbot
+# 聊天机器人
 
-Based on ~~Keras~~ TensorLayer.
+​基于 ~~Keras~~ TensorLayer （Keras 封装性太高，实现复杂模型的代码让人难以理解 :joy:）
 
-Data from https://github.com/fateleak/dgk_lost_conv
+数据集： [中文对白语料 ](https://github.com/fateleak/dgk_lost_conv)
 
 ## TODO
 
 - [x] Preprocess
 - [x] Seq2Seq
+- [x] Inference
 - [ ] Word2Vec
-- [ ] Inference
 - [ ] Attention
 
 ## References
 
-https://github.com/tensorlayer/seq2seq-chatbot
+[Seq2Seq Chatbot](https://github.com/tensorlayer/seq2seq-chatbot)
 
-https://github.com/fateleak/chatbot-zh-torch7
+[Seq2Seq Chatbot QA](https://github.com/qhduan/Seq2Seq_Chatbot_QA)
 
-https://github.com/qhduan/Seq2Seq_Chatbot_QA
-
-https://github.com/qhduan/just_another_seq2seq
+[Just another seq2seq](https://github.com/qhduan/just_another_seq2seq)
