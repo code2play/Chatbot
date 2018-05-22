@@ -6,17 +6,6 @@ import time
 import pandas as pd
 from gensim.corpora import Dictionary
 
-num_words = 50000
-bos = '<BOS>'
-bos_id = num_words
-eos = '<EOS>'
-eos_id = num_words+1
-unk = '<UNK>'
-unk_id = num_words+2
-pad = '<PAD>'
-pad_id = num_words+3
-num_tokens = num_words+4
-
 
 def now():
     return time.strftime("%m-%d %H:%M", time.localtime())
@@ -28,15 +17,6 @@ def contain_chinese(s):
     return False
 
 
-def doc2id(doc, token2id):
-    for index, word in enumerate(doc):
-        if word in token2id:
-            doc[index] = token2id[word]
-        else:
-            doc[index] = token2id[unk]
-    return doc
-
-
 if __name__=='__main__':
     if not os.path.exists('data'):
         os.mkdir('data')
@@ -45,7 +25,7 @@ if __name__=='__main__':
     Q = []
     A = []
     ALL = []
-    with open('./data/dgk_shooter_z.conv', 'r', encoding='UTF-8', errors='ignore') as f:
+    with open('./data/xiaohuangji50w_fenciA.conv', 'r', encoding='UTF-8', errors='ignore') as f:
         a = f.readline().strip()
         for line in f:
             q = a
@@ -63,17 +43,9 @@ if __name__=='__main__':
     A = [i.split('/') for i in A]
     ALL = [i.split('/') for i in ALL]
     corpus = Dictionary(ALL)
-    corpus.filter_extremes(no_below=3, no_above=1.0, keep_n=num_words)
 
     token2id = corpus.token2id
-    token2id[bos] = bos_id
-    token2id[eos] = eos_id
-    token2id[unk] = unk_id
-    token2id[pad] = pad_id
     print(now(), 'Dictionary size: {}'.format(len(token2id)))
-
-    Q = [doc2id(word, token2id) for word in Q]
-    A = [doc2id(word, token2id) for word in A]
 
     print(now(), 'Saving Processed Data')
     pickle.dump(Q, open('./data/Q.txt', 'wb'))
