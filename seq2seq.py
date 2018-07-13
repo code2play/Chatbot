@@ -1,4 +1,3 @@
-import pickle
 import time
 
 import jieba
@@ -13,14 +12,17 @@ from tensorlayer.nlp import sample_top, word_ids_to_words, words_to_word_ids
 from tensorlayer.prepro import (pad_sequences, sequences_add_end_id,
                                 sequences_add_start_id, sequences_get_mask)
 
-from preprocess import (bos, bos_id, eos, eos_id, now, num_tokens, num_words,
-                        pad, pad_id, unk, unk_id)
+from utils import bos, eos, load_dict, load_QA, pad, unk
 
-Q = pickle.load(open('./data/Q.txt', 'rb'))
-A = pickle.load(open('./data/A.txt', 'rb'))
+Q, A = load_QA()
+token2id, id2token, num_tokens = load_dict()
+bos_id = token2id[bos]
+eos_id = token2id[eos]
+unk_id = token2id[unk]
+pad_id = token2id[pad]
 
-token2id = pickle.load(open('./data/token2id.txt', 'rb'))
-id2token = {v:k for k, v in token2id.items()}
+Q = [words_to_word_ids(seq, token2id, unk_key=unk) for seq in Q]
+A = [words_to_word_ids(seq, token2id, unk_key=unk) for seq in A]
 
 Q = sequences_add_end_id(Q, end_id=eos_id)
 A = sequences_add_end_id(A, end_id=eos_id)
@@ -46,7 +48,7 @@ def model(encode_in, decode_in, isTrain=True, reuse=False):
                     inputs=seq,
                     vocabulary_size=num_tokens,
                     embedding_size=emb_dim,
-                    name='embedding_seq'
+                    name='embedding_layer'
                 )
             return emb
 
@@ -58,7 +60,7 @@ def model(encode_in, decode_in, isTrain=True, reuse=False):
             encode_sequence_length=retrieve_seq_length_op2(encode_in),
             decode_sequence_length=retrieve_seq_length_op2(decode_in),
             dropout=(0.5 if isTrain else None),
-            n_layer=1,
+            n_layer=3,
             return_seq_2d=True,
             name='seq2seq'
         )
@@ -90,7 +92,9 @@ train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(loss)
 sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False))
 tl.layers.initialize_global_variables(sess)
 
-if not tl.files.load_and_assign_npz(sess=sess, name='model.npz', network=train_net):
+if not tl.files.load_and_assign_npz(sess=sess, name='./model.npz', network=train_net):
+    embedding_layer = tl.layers.get_layers_with_name(train_net, 'embedding_layer')
+    tl.files.load_and_assign_npz(sess=sess, name='word2vec.npz', network=embedding_layer)
     # Train
     for epoch in range(n_epoch):
         epoch_time = step_time = time.time()
@@ -110,22 +114,20 @@ if not tl.files.load_and_assign_npz(sess=sess, name='model.npz', network=train_n
                             target_mask: batch_target_mask})
 
             if n_iter % 200 == 0:
-                print("Epoch[%d/%d] step:[%d/%d] loss:%f took:%.5fs" % \
-                    (epoch, n_epoch, n_iter, n_step, err, time.time() - step_time))
+                print(f"Epoch[{epoch+1}/{n_epoch}] step[{n_iter}/{n_step}] "
+                      f"loss:{err} took:{time.time()-step_time:.2f}s")
                 step_time = time.time()
 
             total_err += err
             n_iter += 1
-
-        print("Epoch[%d/%d] averaged loss:%f took:%.5fs" % \
-            (epoch, n_epoch, total_err/n_iter, time.time()-epoch_time))
+        # TODO
+        # Validation
+        print("Epoch[%d/%d] averaged loss:%f took:%.2fs" % \
+            (epoch+1, n_epoch, total_err/n_iter, time.time()-epoch_time))
         tl.files.save_npz(train_net.all_params, name='model.npz', sess=sess)
 
-# TODO
-# Evaluation
-
 # Inference
-jieba.initialize()
+# jieba.initialize()
 while True:
     query = input('> ')
 
@@ -133,7 +135,8 @@ while True:
         print('>> 好的，再见')
         break
 
-    query = list(jieba.cut(query))
+    # query = list(jieba.cut(query))
+    query = list(query)
     query = words_to_word_ids(query, token2id, unk_key=unk)
 
     state = sess.run(seq2seq.final_state_encode, {encode_in_1d: [query]})
@@ -161,3 +164,5 @@ while True:
             reply.append(word)
     reply = word_ids_to_words(reply, id2token)
     print('>> ' + ''.join(reply))
+
+sess.close()

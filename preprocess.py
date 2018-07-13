@@ -78,6 +78,7 @@ if __name__=='__main__':
     print(now(), 'Saving Processed Data')
     pickle.dump(Q, open('./data/Q.txt', 'wb'))
     pickle.dump(A, open('./data/A.txt', 'wb'))
+    pickle.dump(ALL, open('./data/ALL.txt', 'wb'))
     pickle.dump(token2id, open('./data/token2id.txt', 'wb'))
 
     print(now(), 'All Done!')

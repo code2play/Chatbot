@@ -1,6 +1,6 @@
 # 聊天机器人
 
-​基于 ~~Keras~~ TensorLayer （Keras 封装性太高，实现复杂模型的代码让人难以理解 :joy:）
+基于 TensorFlow 以及 TensorLayer
 
 数据集： [中文对白语料 ](https://github.com/fateleak/dgk_lost_conv)
 
@@ -9,7 +9,7 @@
 - [x] Preprocess
 - [x] Seq2Seq
 - [x] Inference
-- [ ] Word2Vec
+- [x] Word2Vec
 - [ ] Attention
 
 ## References
