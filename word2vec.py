@@ -1,35 +1,40 @@
+import pickle
 import time
 
 import numpy as np
 import tensorflow as tf
 import tensorlayer as tl
 from tensorlayer.layers import Word2vecEmbeddingInputlayer
-from tensorlayer.nlp import generate_skip_gram_batch, words_to_word_ids
-from tensorlayer.prepro import sequences_add_end_id, sequences_add_start_id
+from tensorlayer.nlp import Vocabulary, generate_skip_gram_batch
 
-from utils import bos, eos, load_ALL, load_dict, pad, unk
+from preprocess import bos, eos, pad, unk, vocab_dir
 
-ALL = load_ALL()
-token2id, id2token, num_tokens = load_dict()
-bos_id = token2id[bos]
-eos_id = token2id[eos]
-unk_id = token2id[unk]
-pad_id = token2id[pad]
+ALL = pickle.load(open('./data/ALL.txt', 'rb'))
 
-ALL = [words_to_word_ids(seq, token2id, unk_key=unk) for seq in ALL]
-ALL = sequences_add_start_id(ALL, start_id=bos_id)
-ALL = sequences_add_end_id(ALL, end_id=eos_id)
+vocab = Vocabulary(vocab_dir, bos, eos, unk, pad)
+token2id = vocab.vocab
+id2token = vocab.reverse_vocab
+num_tokens = len(token2id)
+bos_id = vocab.start_id
+eos_id = vocab.end_id
+unk_id = vocab.unk_id
+pad_id = vocab.pad_id
+
 ALL = [word for seq in ALL for word in seq]
 
 # Parameters
-batch_size = 20  # Note: small batch_size need more steps for a Epoch
+batch_size = 20
 emb_dim = 300
 skip_window = 5
 num_skips = 10
 num_sampled = 100
-lr = 0.2
-n_epoch = 10
+n_epoch = 15
 num_steps = int((len(ALL) / batch_size) * n_epoch)
+lr = 0.2
+# starter_learning_rate = 0.1
+# global_step = tf.Variable(0)
+# lr = tf.train.exponential_decay(starter_learning_rate, global_step,
+#                                 10000, 0.99, staircase=True)
 
 train_inputs = tf.placeholder(tf.int32, shape=(batch_size))
 train_labels = tf.placeholder(tf.int32, shape=(batch_size, 1))
@@ -58,7 +63,8 @@ with tf.Session() as sess:
             skip_window=skip_window, 
             data_index=data_index)
             
-        feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
+        feed_dict = {train_inputs: batch_inputs, 
+                     train_labels: batch_labels}
         _, loss_val = sess.run([train_op, cost], feed_dict=feed_dict)
         average_loss += loss_val
 

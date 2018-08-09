@@ -2,14 +2,21 @@
 
 基于 TensorFlow 以及 TensorLayer
 
-数据集： [中文对白语料 ](https://github.com/fateleak/dgk_lost_conv)
+数据集： [小黄鸡](https://github.com/fateleak/dgk_lost_conv/tree/master/results)
+
+## 运行效果
+
+![1533791431862](assets/1533791431862.png)
+
+![1533794212681](assets/1533794212681.png)
+
+![1533794183385](assets/1533794183385.png)
 
 ## TODO
 
 - [x] Preprocess
-- [x] Seq2Seq
-- [x] Inference
 - [x] Word2Vec
+- [x] Seq2Seq
 - [ ] Attention
 
 ## References

@@ -1,5 +1,10 @@
-data
 .vscode
 __pycache__
-1606.08340.pdf
-b6d786_b09eff1bdf874ca39d0715b384471e90.pdf
+backup
+data/chinese
+How NOT To Evaluate Your Dialogue System An Empirical Study of Unsupervised Evaluation Metrics for Dialogue Response Generation.pdf
+Improved Deep Learning Baselines for Ubuntu Corpus Dialogs.pdf
+Topic Aware Neural Response Generation.pdf
+Evaluating Quality of Chatbots and Intelligent Conversational Agents.pdf
+Survey on Chatbot Design Techniques in Speech Conversation Systems.pdf
+A Neural Conversational Model.pdf
